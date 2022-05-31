@@ -61,6 +61,14 @@ func WithPort(privateport, publicport uint16, builders ...func(*types.Port)) fun
 	}
 }
 
+func WithSize(size int64) func(*types.Container) {
+	return func(c *types.Container) {
+		if size >= 0 {
+			c.SizeRw = size
+		}
+	}
+}
+
 // IP sets the ip of the port
 func IP(ip string) func(*types.Port) {
 	return func(p *types.Port) {

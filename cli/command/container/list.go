@@ -114,18 +114,33 @@ func runPs(dockerCli command.Cli, options *psOptions) error {
 		return err
 	}
 
-	containers, err := dockerCli.Client().ContainerList(ctx, *listOptions)
-	if err != nil {
-		return err
-	}
-
 	format := options.format
 	if len(format) == 0 {
 		if len(dockerCli.ConfigFile().PsFormat) > 0 && !options.quiet {
 			format = dockerCli.ConfigFile().PsFormat
+
+			tmpl, err := templates.NewParse("", format)
+			if err != nil {
+				return err
+			}
+
+			optionsProcessor := formatter.NewContainerContext()
+
+			if err := tmpl.Execute(io.Discard, optionsProcessor); err != nil {
+				return err
+			}
+
+			if _, ok := optionsProcessor.FieldsUsed["Size"]; ok {
+				listOptions.Size = true
+			}
 		} else {
 			format = formatter.TableFormatKey
 		}
+	}
+
+	containers, err := dockerCli.Client().ContainerList(ctx, *listOptions)
+	if err != nil {
+		return err
 	}
 
 	containerCtx := formatter.Context{
