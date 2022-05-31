@@ -61,6 +61,7 @@ func WithPort(privateport, publicport uint16, builders ...func(*types.Port)) fun
 	}
 }
 
+// WithSize adds size in bytes to the container
 func WithSize(size int64) func(*types.Container) {
 	return func(c *types.Container) {
 		if size >= 0 {
